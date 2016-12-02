@@ -35,3 +35,4 @@ if __name__ == "__main__":
     pass
 # TODO: generate the check-in report; send out report
     pass
+# FIXME: release global lock on exit (context?)
