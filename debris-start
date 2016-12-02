@@ -1,9 +1,37 @@
 #!/usr/bin/env python3
 #
-# debris -- debian package autobuild system
+# debris-start -- trigger for debris debian package autobuild system
 #
 
 import debris
 
 if __name__ == "__main__":
     print("Hello!")
+# FIXME: set global lock to prevent multiple instances
+# FIXME: wrap the schroot loading into a function
+# TODO: load schroot configuration
+    pass
+# TODO: update schroot
+    pass
+# FIXME: wrap the git parsing into a function
+# TODO: find the local git repository and do cleanup / init
+    pass
+# TODO: update local git repository and submodules
+    pass
+# TODO: compare local repo and db info; filter packages to build
+# FIXME: wrap the building part into a function
+# TODO: generate the git-wanna-build list
+    pass
+# TODO: generate source package and .dsc description file
+    pass
+# TODO: build packages using .dsc; put the result in the given path
+    pass
+# TODO: post-build checks
+    pass
+# TODO: record build log; generate the build report; send out report
+    pass
+# FIXME: wrap the reprepro handler into a function
+# TODO: let reprepro checkin the given src packages and deb packages
+    pass
+# TODO: generate the check-in report; send out report
+    pass
