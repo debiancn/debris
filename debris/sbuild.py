@@ -1,20 +1,27 @@
 #!/usr/bin/env python3
-#
-# debris.sbuild -- sbuild handler for debris autobuild system
+
+"""debris.sbuild -- sbuild handler for debris autobuild system."""
+
+__license__ = "BSD-3-Clause"
+__docformat__ = "reStructuredText"
 
 from . import common
 import configparser
 
 from .common import run_process
 from .common import getconfig
+from .common import log
 
 class SBuilder(object):
     class SBInstance(object):
         """
         The instance to represent the schroot instance.
 
-        Note: self.ready is a bool. True or False or None.
-        TODO: use subprocess + communicate() to obtain information.
+        .. note::
+            self.ready is a bool. True or False or None.
+
+        .. todo::
+            use subprocess + communicate() to obtain information.
         """
         def __init__(self, CHROOT: str = None, arch: str = None, suite: str = None):
             if CHROOT:
@@ -32,32 +39,56 @@ class SBuilder(object):
                          getconfig('DEBRIS_SBUILD_CHROOT_SUFFIX', str),
                         ))
             self.ready = None
-        
+            log.debug('new SBInstance, chroot: {}, arch: {}, suite: {}'.format(
+                    self.chroot,
+                    self.arch,
+                    self.suite,
+                    ))
+
         def _update(self):
             """
             Update the instance by calling 'sbuild-update'.
 
-            NOTE: By default, we are modifying the original "source:"-prefixed
-            chroot, which means we need permission called source-root-users in
-            config file.
-            
+            .. note:
+                By default, we are modifying the original "source:"-prefixed
+                chroot, which means we need permission called source-root-users in
+                config file.
+
             Same notice applies to the following methods.
             """
+            log.debug('running sbuild-update (update), chroot: {}'.format(
+                    self.chroot,
+                    ))
             run_process(['sbuild-update', self.chroot], 1800)
+            log.debug('finished sbuild-update (update), chroot: {}'.format(
+                    self.chroot,
+                    ))
             pass
 
         def _upgrade(self):
             """
             Call 'sbuild-update --upgrade'.
             """
+            log.debug('running sbuild-update (upgrade), chroot: {}'.format(
+                    self.chroot,
+                    ))
             run_process(['sbuild-update', '--upgrade', self.chroot], 3600)
+            log.debug('finished sbuild-update (upgrade), chroot: {}'.format(
+                    self.chroot,
+                    ))
             pass
 
         def _full_upgrade(self):
             """
             Call 'sbuild-update --dist-upgrade'.
             """
+            log.debug('running sbuild-update (dist-upgrade), chroot: {}'.format(
+                    self.chroot,
+                    ))
             run_process(['sbuild-update', '--dist-upgrade', self.chroot], 3600)
+            log.debug('finished sbuild-update (dist-upgrade), chroot: {}'.format(
+                    self.chroot,
+                    ))
             pass
 
         def _dist_upgrade(self):
@@ -82,7 +113,7 @@ class SBuilder(object):
                         'sbuild',
                         '--dist={}'.format(self.suite),
                         '--arch={}'.format(self.arch),
-                        keyfilepath.dsc,
+                        keyfilepath,
                         ])
             pass
 

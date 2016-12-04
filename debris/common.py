@@ -4,6 +4,7 @@
 
 import configparser
 import subprocess
+import logging
 
 def load_config(filepath: str) -> configparser.ConfigParser:
     """
@@ -32,6 +33,7 @@ def getconfig(config_key: str, returntype: type = str):
             'DEBRIS_DB_FILE' : '/var/cache/debris/history.db',
             'DEBRIS_SBUILD_MIRRORURI' : 'http://ftp2.cn.debian.org/debian',
             'DEBRIS_SBUILD_EXTRAURI' : 'http://repo.debiancn.org/',
+            'DEBRIS_SBUILD_OUTPUTDIR' : '/var/cache/debris/output/',
             'DEBRIS_SBUILD_CHROOT_ARCH' : 'amd64',
             'DEBRIS_SBUILD_CHROOT_SUITE' : 'stretch',
             'DEBRIS_SBUILD_CHROOT_SUFFIX' : 'sbuild',
@@ -76,3 +78,21 @@ def run_process(arglist, timeout=None) -> subprocess.CompletedProcess:
         raise
 
     return result
+
+# init a logger here
+def __init_logger() -> logging.Logger:
+    # TODO: properly determine logging level
+    l = logging.getLogger('debris')
+    l.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(asctime)s %(name)s: %(levelname)s: %(message)s')
+
+    ch.setFormatter(formatter)
+    l.addHandler(ch)
+
+    return l
+
+log = __init_logger()
