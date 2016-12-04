@@ -19,4 +19,4 @@ to record the past building activities as well as package versions.
 
 ```Copyright 2016, Boyuan Yang <073plan@gmail.com>```
 
-MIT License (Expat)
+BSD-3-Clause
