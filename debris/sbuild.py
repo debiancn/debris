@@ -59,7 +59,7 @@ class SBuilder(object):
             log.debug('running sbuild-update (update), chroot: {}'.format(
                     self.chroot,
                     ))
-            run_process(['sbuild-update', self.chroot], 1800)
+            result = run_process(['sbuild-update', self.chroot], 1800)
             log.debug('finished sbuild-update (update), chroot: {}'.format(
                     self.chroot,
                     ))
@@ -72,7 +72,7 @@ class SBuilder(object):
             log.debug('running sbuild-update (upgrade), chroot: {}'.format(
                     self.chroot,
                     ))
-            run_process(['sbuild-update', '--upgrade', self.chroot], 3600)
+            result = run_process(['sbuild-update', '--upgrade', self.chroot], 3600)
             log.debug('finished sbuild-update (upgrade), chroot: {}'.format(
                     self.chroot,
                     ))
@@ -85,7 +85,7 @@ class SBuilder(object):
             log.debug('running sbuild-update (dist-upgrade), chroot: {}'.format(
                     self.chroot,
                     ))
-            run_process(['sbuild-update', '--dist-upgrade', self.chroot], 3600)
+            result = run_process(['sbuild-update', '--dist-upgrade', self.chroot], 3600)
             log.debug('finished sbuild-update (dist-upgrade), chroot: {}'.format(
                     self.chroot,
                     ))
@@ -107,6 +107,15 @@ class SBuilder(object):
 
         def buildpkg(self, keyfilepath : str, buildtype: str = "dsc"):
             # prefer using arch + suite rather than hardcoded schroot option
+            log.info('trying to build pkg, path: {}, type: {}.'.format(
+                    keyfilepath,
+                    buildtype,
+                    ))
+            # determine the place to put the packages
+            _sbuild_outputdir = getconfig('DEBRIS_SBUILD_OUTPUTDIR')
+            if _sbuild_outputdir == None:
+                log.critical('PACKAGE OUTPUT DIR NOT SET!')
+                raise Exception('ERR_MISSING_DEBRIS_SBUILD_OUTPUTDIR_CONFIG')
             if buildtype == "dsc":
                 if self.arch and self.suite:
                     run_process([

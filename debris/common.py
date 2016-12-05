@@ -6,6 +6,24 @@ import configparser
 import subprocess
 import logging
 
+# init a logger here
+def __init_logger() -> logging.Logger:
+    # TODO: properly determine logging level
+    l = logging.getLogger('debris')
+    l.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(asctime)s %(name)s: %(levelname)s: %(message)s')
+
+    ch.setFormatter(formatter)
+    l.addHandler(ch)
+
+    return l
+
+log = __init_logger()
+
 def load_config(filepath: str) -> configparser.ConfigParser:
     """
     load configuration file using configparser.
@@ -59,6 +77,9 @@ def run_process(arglist, timeout=None) -> subprocess.CompletedProcess:
     Require python 3.5+
     """
     try:
+        log.debug('executing subprocess: {}, timeout {}.'.format(
+                str(arglist),
+                timeout))
         result = subprocess.run(
                 arglist,
                 stdout=subprocess.PIPE,
@@ -68,31 +89,21 @@ def run_process(arglist, timeout=None) -> subprocess.CompletedProcess:
                 );
     except subprocess.TimeoutExpired as e:
         # TODO: deal with it
+        log.error('subprocess timed out! Exception: {}.'.format(
+                str(e)))
         raise
         return e
     except subprocess.CalledProcessError as e:
         # TODO: deal with it
+        log.error('subprocess returned with non-zero! Exception: {}.'.format(
+                str(e)))
         raise
         return e
-    except:
+    except Exception as e:
+        log.critical('unhandled exception raised! Exception: {}.'.format(
+                str(e)))
         raise
 
     return result
 
-# init a logger here
-def __init_logger() -> logging.Logger:
-    # TODO: properly determine logging level
-    l = logging.getLogger('debris')
-    l.setLevel(logging.DEBUG)
 
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter('%(asctime)s %(name)s: %(levelname)s: %(message)s')
-
-    ch.setFormatter(formatter)
-    l.addHandler(ch)
-
-    return l
-
-log = __init_logger()
