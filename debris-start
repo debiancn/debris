@@ -12,26 +12,57 @@ import debris.common
 
 from debris.common import log
 
+
+def firstrun():
+    """Debris first-run wizard."""
+    pass
+
 def main():
     """Main function wrapper."""
 
     parser = argparse.ArgumentParser(
             description="debris-start trigger.",
-            epilog="should be triggered using crontab.")
+            epilog="should be triggered using crontab."
+            )
+    parser.add_argument(
+            '--firstrun',
+            help="call the firstrun wizard",
+            action="store_true",
+            )
     parser.add_argument(
             '--config',
             '-c',
-            help="run program with given config file")
+            help="run program with given config file"
+            )
     parser.add_argument(
             '--version',
-            '-v',
+            '-V',
             help="show program version",
             action="version",
             version="debris-start 0.0.0",
             )
+    parser.add_argument(
+            '--verbose',
+            '-v',
+            help="increase verbose level",
+            action="count",
+            )
+    parser.add_argument(
+            '--quiet',
+            '-q',
+            help="decrease verbose level",
+            action="count",
+            )
     args = parser.parse_args()
+    "calcuate verbosity first."
+    log.setLevel(debris.common.get_log_verbosity(parser.verbose - parser.quiet))
+    log.debug("log verbosity set.")
+    "then parse the arguments."
+    if args.firstrun:
+        firstrun()
+        return
     if args.config:
-        log.info('loading config file: {}'.format(str(args.config))
+        log.info('loading config file: {}'.format(str(args.config)))
 
 
 if __name__ == "__main__":

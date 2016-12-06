@@ -6,6 +6,29 @@ import configparser
 import subprocess
 import logging
 
+def get_log_verbosity(offset: int, base=1):
+    """Get logging verbosity according to verbosity offset.
+
+    The offset is determined by user input in argv.
+    The more '-v' given, the larger offset is.
+    The more '-q' given, the smaller offset is.
+
+    By default, we set verbosity to show logging.INFO.
+    """
+    offset_list = [
+            logging.DEBUG,
+            logging.INFO,
+            logging.WARN,
+            logging.ERROR,
+            logging.CRITICAL,
+            ]
+    level_select = base - offset
+    if level_select < 0:
+        level_select = 0
+    elif level_select > 4:
+        level_select = 4
+    return offset_list[level_select]
+
 # init a logger here
 def __init_logger() -> logging.Logger:
     # TODO: properly determine logging level
