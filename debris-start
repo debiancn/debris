@@ -1,12 +1,41 @@
 #!/usr/bin/env python3
-#
-# debris-start -- trigger for debris debian package autobuild system
-#
+
+"""debris-start -- trigger for debris debian package autobuild system."""
+
+import argparse
 
 import debris
+import debris.db
+import debris.git
+import debris.sbuild
+import debris.common
+
+from debris.common import log
+
+def main():
+    """Main function wrapper."""
+
+    parser = argparse.ArgumentParser(
+            description="debris-start trigger.",
+            epilog="should be triggered using crontab.")
+    parser.add_argument(
+            '--config',
+            '-c',
+            help="run program with given config file")
+    parser.add_argument(
+            '--version',
+            '-v',
+            help="show program version",
+            action="version",
+            version="debris-start 0.0.0",
+            )
+    args = parser.parse_args()
+    if args.config:
+        log.info('loading config file: {}'.format(str(args.config))
+
 
 if __name__ == "__main__":
-    print("Hello!")
+    main()
 # FIXME: set global lock to prevent multiple instances
 # FIXME: wrap the schroot loading into a function
 # TODO: load schroot configuration

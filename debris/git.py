@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-#
-# debris.git -- git repo integration on building packages for debris
+
+"""debris.git -- git repo integration on building packages for debris."""
 
 import os
 
