@@ -55,7 +55,7 @@ def main():
             )
     args = parser.parse_args()
     "calcuate verbosity first."
-    log.setLevel(debris.common.get_log_verbosity(parser.verbose - parser.quiet))
+    log.setLevel(debris.common.get_log_verbosity((args.verbose or 0) - (args.quiet or 0)))
     log.debug("log verbosity set.")
     "then parse the arguments."
     if args.firstrun:
