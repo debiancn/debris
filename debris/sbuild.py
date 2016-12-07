@@ -126,9 +126,12 @@ class SBuilder(object):
                         ])
             elif buildtype == "path":
                 """all we need to do is to:
-                    * Enter the path.
-                    * Call gbp buildpacakge and save result at parent dir.
-                    * Done.
+                 * Enter the path.
+                 * Call gbp buildpacakge and save result at parent dir.
+                 * Done.
+
+                Reference command line:
+                    gbp buildpackage --git-submodules --git-[no-]pristine-tar --git-builder="sbuild -A -v --source-only-changes -c stretch-amd64-build"
 
                     We do not need to clean the environment.
                  """

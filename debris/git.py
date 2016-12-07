@@ -88,6 +88,23 @@ class DebrisRepo(Repo):
                     )
         self.git.reset('--hard', 'HEAD') # XXX: replace with wrapper
         self.git.submodule('update', '--force')
+        if 'UPDATE_GIT_REPO' in flags.keys() and flags['UPDATE_GIT_REPO']:
+            log.info('WORKAROUND: pulling in any pristine-tar branch.')
+            _local_pkglist = self.get_pkglist()
+            for i in _local_pkglist:
+                _local_subrepo = i.repo
+                try:
+                    _local_subrepo.git.checkout('origin/pristine-tar', '-b', 'pristine-tar')
+                    _local_subrepo.git.checkout('-')
+                except:
+                    try:
+                        _local_subrepo.git.checkout('upstream/pristine-tar', '-b', 'pristine-tar')
+                        _local_subrepo.git.checkout('-')
+                    except:
+                        log.warn('repo "{}" does not have pristine-tar, ignoring...'.format(i.package))
+                    pass
+        self.git.reset('--hard', 'HEAD')
+        self.git.submodule('update', '--force')
 
     def get_pkglist(self) -> list:
         """Obtain a list about the information of existing repo.
@@ -159,7 +176,8 @@ class ClonedRepoContext(object):
     def __init__(self, orig_repo: DebrisRepo, todo_list: list, blacklisted_packages: list = []):
         self.orig_repo = orig_repo
         self.todo_list = todo_list
-        self.tmpdir = tempfile.TemporaryDirectory(prefix='debris')
+        self.cloned_repo_list = []
+        self.tmpdir = tempfile.TemporaryDirectory(prefix='debris_')
         self.path = self.tmpdir.name
         self.blacklisted_packages = blacklisted_packages
         log.debug('generating building tmpdir: {}'.format(self.tmpdir))
@@ -171,9 +189,24 @@ class ClonedRepoContext(object):
                 continue
             log.debug('cloning {}...'.format(i.package))
             cloned_repo = i.repo.clone(os.path.join(self.path, str(i.package)))
+            self.cloned_repo_list.append(cloned_repo)
+
 # XXX: is there guarantee that the cloned one has the absolutely correct checkout?
         return self
 
     def __exit__(self, type, value, traceback):
         log.debug('cleaning up tmpdir...')
         self.tmpdir.cleanup()
+
+    def reset(self):
+        """Clean up built files; return to completely clean."""
+        for i in self.cloned_repo_list:
+            i.git('reset', '--hard')
+            i.git('clean', '-df')
+            i.git('clean', '-Xdf')
+        # also remove non-directories in buildpath
+        _local_path = self.path
+        for i in os.listdir(_local_path):
+            _local_filepath = os.path.join(self.path, i)
+            if not os.path.isdir(_local_filepath):
+                os.unlink(_local_filepath)

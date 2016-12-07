@@ -104,6 +104,7 @@ def main():
                     )
 
             "convert and build: git repo -> dsc -> result"
+# XXX: WE SHOULD CONSIDER USING A QUEUE TO ARRANGE ALL WORKS!
             with debris.git.ClonedRepoContext(my_git_repo, todo_pkglist) as gcontext:
                 log.debug("Good! we have context: {}".format(gcontext.path))
                 __import__("time").sleep(3600)
