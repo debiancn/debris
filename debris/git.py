@@ -217,3 +217,39 @@ class ClonedRepoContext(object):
             _local_filepath = os.path.join(self.path, i)
             if not os.path.isdir(_local_filepath):
                 os.unlink(_local_filepath)
+
+def repo_is_debian_native(repo: Repo):
+    """Determine if the package is debian native.
+    """
+
+    _changelog = Changelog(open(os.path.join(repo.working_dir, 'debian/changelog')).read())
+    _version = _changelog.get_version()
+    if _version._BaseVersion__debian_revision == None: # XXX: using private member
+        return True
+    else:
+        return False
+
+def repo_get_upstream_tag_version(repo: Repo):
+    """Get the upstream tag version.
+
+    .. note: this is not a upstream version. Epoch is included here.
+    """
+
+    _changelog = Changelog(open(os.path.join(repo.working_dir, 'debian/changelog')).read())
+    _version = _changelog.get_version()
+    _target_str = ""
+    if repo_is_debian_native(repo):
+        _target_str = str(_version)
+    else:
+        _target_str = str(_version).split(str(_version._BaseVersion__debian_revision))[0][0:-1]
+
+    "Version mangling according to DEP-14."
+    _target_str = _target_str.replace(':', '%').replace('~', '_')
+    while '..' in _target_str:
+        _target_str = _target_str.replace('..', '.#.')
+    if _target_str[-1] == '.':
+        _target_str = _target_str + '#'
+    if _target_str[-5:] == '.lock':
+        _target_str = _target_str[:-5] + '.#lock'
+
+    return _target_str

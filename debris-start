@@ -121,19 +121,36 @@ def main():
                             _local_pristine_tar_line = "--git-pristine-tar"
                         except:
                             _local_pristine_tar_line = "--git-no-pristine-tar"
+                            _local_upstream_tag_line = "--git-upstream-tag=upstream/{}".format(
+                                    debris.git.repo_get_upstream_tag_version(j)
+                                    )
 
-#TODO: detect native package, and deal with it properly
-#TODO: for quilt packages without pristine-tar, detect the latest upstream tag.
+                        "Determine if it is a native package." # XXX: duplicated with some code in git.py
+                        _local_is_debian_native = False
+                        if debris.git.repo_is_debian_native(j):
+                            _local_is_debian_native = True
 
-                        "Real building!"
-                        log.info('Starting build: {}'.format(j.working_dir))
-                        result = run_process([ # XXX: really bad implementation!
+                        "Now we form the build command."
+                        _local_build_command = [
                                 'gbp',
                                 'buildpackage',
                                 '--git-submodules',
+                                '--git-ignore-branch',
                                 _local_pristine_tar_line,
                                 '--git-builder="sbuild -A -v --source-only-changes -c {}"'.format(i.chroot),
-                                ])
+                                ]
+
+                        if _local_is_debian_native:
+                            _local_build_command.append('--git-no-create-orig')
+
+                        if _local_pristine_tar_line == "--git-no-pristine-tar":
+                            _local_build_command.append(_local_upstream_tag_line)
+
+
+                        "Real building!"
+                        log.info('Starting build: {}'.format(j.working_dir))
+                        log.debug('Build command: {}'.format(str(_local_build_command)))
+                        result = run_process(_local_build_command) # XXX: really bad implementation!
 
 # TODO: deal with build result and log, write into db
 
@@ -144,7 +161,7 @@ def main():
                         if not os.path.isdir(_local_filepath):
                             "send this file away."
 # FIXME: send away this file!
-                            os.system('mv -f {} /tmp/'.format(_local_filepath))
+                            os.system('mv -f {} {}'.format(_local_filepath, getconfig('DEBRIS_SBUILD_OUTPUTDIR'))) # XXX: no relative path support
 
                     "finish for one architecture. clean up all built files."
                     log.info('build for arch {} finished, continue.'.format(i.arch))
