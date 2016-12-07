@@ -13,6 +13,7 @@ import debris.common
 from debris.common import log
 from debris.common import DebrisGlobalLock
 
+my_builder = None
 
 def firstrun():
     """Debris first-run wizard."""
@@ -73,7 +74,11 @@ def main():
     try:
         with DebrisGlobalLock():
             log.debug('we got the global instance lock.')
-            pass
+
+            global my_builder
+            my_builder = debris.sbuild.SBuilder()
+            my_builder.prepare()
+
     except DebrisGlobalLock.DebrisInstanceLockedError as e:
         raise
 

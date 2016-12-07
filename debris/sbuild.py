@@ -127,12 +127,24 @@ class SBuilder(object):
             pass
 
 
-    def __init__(self, config: configparser.ConfigParser):
+    def __init__(self):
         """
         Initialize the Sbuilder object.
 
         the config prefix: 'DEBRIS_SBUILD'
         """
+        self._chroot_list = []
+        self.instances = []
+        for i in getconfig('DEBRIS_SBUILD_CHROOT_SUITE', list):
+            for j in getconfig('DEBRIS_SBUILD_CHROOT_ARCH', list):
+                self._chroot_list.append(
+                        '-'.join(
+                            [i, j, getconfig('DEBRIS_SBUILD_CHROOT_SUFFIX')]
+                            )
+                        )
+        for i in self._chroot_list:
+            self.instances.append(self.SBInstance(CHROOT=i))
+
 #TODO FINISH ME
         pass
 
@@ -152,7 +164,17 @@ class SBuilder(object):
         The detailed description is from debris.conf.
         """
 
-    def buildall():
+    def prepare(self):
+        """
+        Prepare all instances, using sbuild-update.
+        """
+        log.info('starting to update all chroot instances...')
+        for i in self.instances:
+            i.prepare()
+        log.info('all chroot instances updated.')
+        return
+
+    def buildall(self):
         """
         Build all packages that need to be built.
         """
