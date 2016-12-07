@@ -11,10 +11,12 @@ import debris.sbuild
 import debris.common
 
 from debris.common import log
+from debris.common import DebrisGlobalLock
 
 
 def firstrun():
     """Debris first-run wizard."""
+    print('not implemented yet.')
     pass
 
 def main():
@@ -63,6 +65,17 @@ def main():
         return
     if args.config:
         log.info('loading config file: {}'.format(str(args.config)))
+        debris.common.load_config(args.config)
+
+    "Now, we really start the working instance."
+
+    "Holding a global lock to prevent multiple instances from running."
+    try:
+        with DebrisGlobalLock():
+            log.debug('we got the global instance lock.')
+            pass
+    except DebrisGlobalLock.DebrisInstanceLockedError as e:
+        raise
 
 
 if __name__ == "__main__":

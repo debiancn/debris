@@ -2,9 +2,11 @@
 #
 # debris.common -- common things for debris autobuild system
 
+import os
 import configparser
 import subprocess
 import logging
+import fcntl
 
 def get_log_verbosity(offset: int, base=1):
     """Get logging verbosity according to verbosity offset.
@@ -92,6 +94,32 @@ def getconfig(config_key: str, returntype: type = str):
         return returntype(config[config_key])
     else:
         raise Exception('ERR_CONFIG_KEY_NOT_RECOGNIZED')
+
+class DebrisGlobalLock(object):
+    """A global lock Context Manager class."""
+
+    class DebrisInstanceLockedError(Exception): pass
+
+    def __init__(self, lockfile=os.getenv('HOME')+'/.debris-start.pid'): # XXX: fixme not ideal
+        self.lockfile = lockfile
+        self.f = None
+
+    def __enter__(self):
+        self.f = open(self.lockfile, 'a+')
+        self.f.seek(0)
+        try:
+            fcntl.lockf(self.f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            "Yes, locked by others. Give up."
+            raise DebrisInstanceLockedError('fcntl locking failed, path {}, pid {}.'.format(self.lockfile, self.f.read()))
+        self.f.write(str(os.getpid()))
+        self.f.seek(0)
+        pass
+
+    def __exit__(self, type, value, traceback):
+        os.unlink(self.f.name)
+        fcntl.lockf(self.f.fileno(), fcntl.LOCK_UN)
+        self.f.close()
 
 def run_process(arglist, timeout=None) -> subprocess.CompletedProcess:
     """
