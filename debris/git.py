@@ -4,6 +4,8 @@
 
 import os
 
+import apt
+from apt import apt_pkg
 import git
 import debian
 import debian.changelog
@@ -58,6 +60,7 @@ class DebrisRepo(Repo):
 
         .. note: Internet connection is mandatory.
         """
+# TODO: determine if the git repo already exist! FIXME
         super().__init__(*args, **kwargs)
         assert not self.bare
         self.debris_cleanup()
@@ -91,3 +94,28 @@ class DebrisRepo(Repo):
             pkglist.append(self.PkgRepo(subrepo))
         assert not (pkglist == [])
         return pkglist
+
+    def get_todo_pkglist(self, builtlist: list) -> list:
+        """Deal with external information about built packages.
+
+        Return filtered pkglist."""
+        original_pkglist = self.get_pkglist()
+        filtered_pkglist = []
+        for i in original_pkglist:
+            package_exist = False
+            should_package = False
+            repo_package = i.package
+            repo_version = i.version
+            for j in builtlist:
+                if j['package'] == repo_package:
+                    package_exist = True
+                    if apt_pkg.version_compare(repo_version, j['version']) > 0:
+                        "an outdated package exist."
+                        should_package = True
+            if not package_exist:
+                should_package = True
+            if should_package:
+                log.debug('Needs-Build: {}/{};'.format(i.package, i.version))
+                filtered_pkglist.append(i)
+
+        return filtered_pkglist

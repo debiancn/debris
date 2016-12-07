@@ -94,7 +94,7 @@ def getconfig(config_key: str, returntype: type = str):
             'DEBRIS_SBUILD_CHROOT_SUFFIX' : 'sbuild',
             'DEBRIS_SBUILD_CHROOT_TARGET_DIRECTORY_BASE': '/var/cache/debris/',
             'DEBRIS_GIT_REPO_URL' : 'https://github.com/debiancn/repo',
-            'DEBRIS_GIT_REPO_LOCAL' : '/home/hosiet/src/debiancn/repo',
+            'DEBRIS_GIT_REPO_LOCAL' : '/home/hosiet/src/debian/repo',
             }
 
     # TODO: load config file here
