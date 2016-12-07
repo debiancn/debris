@@ -3,6 +3,7 @@
 """debris.git -- git repo integration on building packages for debris."""
 
 import os
+import tempfile
 
 import apt
 from apt import apt_pkg
@@ -122,3 +123,57 @@ class DebrisRepo(Repo):
                 filtered_pkglist.append(i)
 
         return filtered_pkglist
+
+
+class ClonedRepoContext(object):
+    """A special object to act as the ContextManager for building environment.
+
+    All building process should be inside the directory represented by this
+    context manager object. By default, the building dir should be in /tmp.
+
+    /
+    |
+    -- ..
+    |
+    -- tmp
+       |
+       --- ...
+       |
+       --- debris_XXXXXXX
+           |
+           --- package_1_gitdir
+           |   |
+           |   --- debian/
+           |   |
+           |   --- ...
+           |
+           --- package_2_gitdir
+           |   |
+           |   --- debian/
+           |   |
+           |   --- ...
+           |
+           --- ...
+    """
+
+    def __init__(self, orig_repo: DebrisRepo, todo_list: list, blacklisted_packages: list = []):
+        self.orig_repo = orig_repo
+        self.todo_list = todo_list
+        self.tmpdir = tempfile.TemporaryDirectory(prefix='debris')
+        self.path = self.tmpdir.name
+        self.blacklisted_packages = blacklisted_packages
+        log.debug('generating building tmpdir: {}'.format(self.tmpdir))
+
+    def __enter__(self):
+        for i in self.todo_list:
+            "clone all the repos in the list into tmpdir."
+            if i.package in self.blacklisted_packages:
+                continue
+            log.debug('cloning {}...'.format(i.package))
+            cloned_repo = i.repo.clone(os.path.join(self.path, str(i.package)))
+# XXX: is there guarantee that the cloned one has the absolutely correct checkout?
+        return self
+
+    def __exit__(self, type, value, traceback):
+        log.debug('cleaning up tmpdir...')
+        self.tmpdir.cleanup()
