@@ -2,13 +2,14 @@
 #
 # debris.common -- common things for debris autobuild system
 
+import ast
 import os
 import configparser
 import subprocess
 import logging
 import fcntl
 
-def get_log_verbosity(offset: int, base=1):
+def get_log_verbosity(offset: int, base=2):
     """Get logging verbosity according to verbosity offset.
 
     The offset is determined by user input in argv.
@@ -54,7 +55,7 @@ log = __init_logger()
 config_from_file = None
 
 "global flags"
-flags = []
+flags = {}
 
 def load_config(filepath: str) -> dict:
     """
@@ -68,9 +69,15 @@ def load_config(filepath: str) -> dict:
         raise
 # TODO: exception handler
     for i in config.keys():
+        log.debug('i in config.keys(), i is: {}.'.format(i))
         for j in config[i].keys():
-            result_dict[j.upper()] = config[i][j]
+            log.debug('j in config.keys(), j is: {}.'.format(j))
+            _local_literal = str(config[i][j])
+            log.debug('we are going to save: {}.'.format(config[i][j]))
+            result_dict[j.upper()] = ast.literal_eval(_local_literal)
+            log.debug('we saved {}, its type is {}.'.format(result_dict[j.upper()], type(result_dict[j.upper()])))
 
+    global config_from_file
     config_from_file = result_dict
 
     return # XXX: to be storaged in config_from_file?

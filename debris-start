@@ -61,10 +61,17 @@ def main():
             help="also update base chroots when preparing",
             action="store_true",
             )
+    parser.add_argument(
+            '--update-git-repo',
+            help="update git repo and its submodule when preparing",
+            action="store_true",
+            )
     args = parser.parse_args()
+
     "calcuate verbosity first."
     log.setLevel(debris.common.get_log_verbosity((args.verbose or 0) - (args.quiet or 0)))
     log.debug("log verbosity set.")
+
     "then parse the arguments."
     if args.firstrun:
         firstrun()
@@ -72,13 +79,15 @@ def main():
     if args.config:
         log.info('loading config file: {}'.format(str(args.config)))
         debris.common.load_config(args.config)
+    if args.update_git_repo:
+        debris.common.flags['UPDATE_GIT_REPO'] = True
 
     "Now, we really start the working instance."
 
     "Holding a global lock to prevent multiple instances from running."
     try:
         with DebrisGlobalLock():
-            log.debug('we got the global instance lock.')
+            log.info('we got the global instance lock.')
 
             global my_builder
             my_builder = debris.sbuild.SBuilder()
@@ -90,11 +99,9 @@ def main():
 
             "the object that represent the db"
             my_db = debris.db.DebrisDB(getconfig('DEBRIS_DB_FILE'))
-# TODO: retrieve history 
-            #todo_pkglist = my_git_repo.get_todo_pkglist(
-            #        my_db.get_builtlist()
-            #        )
-            todo_pkglist = my_git_repo.get_todo_pkglist([])
+            todo_pkglist = my_git_repo.get_todo_pkglist(
+                    my_db.get_builtlist()
+                    )
 
             "convert and build: git repo -> dsc -> result"
 

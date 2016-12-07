@@ -16,7 +16,7 @@ from git import Repo
 from . import common
 from .common import run_process
 from .common import getconfig
-from .common import log
+from .common import log, flags
 
 
 class DebrisRepo(Repo):
@@ -75,13 +75,16 @@ class DebrisRepo(Repo):
             - If not init, don't touch anything.
           * hard-reset main module to HEAD.
         """
-        self.git.pull() # XXX: replace with wrapper
-        self.submodule_update(
-                recursive=True,
-                force_remove=True,
-                force_reset=True,
-                keep_going=False,
-                )
+        if 'UPDATE_GIT_REPO' in flags.keys() and flags['UPDATE_GIT_REPO']:
+            log.info('pulling git repo from remote...')
+            self.git.pull() # XXX: replace with wrapper
+            log.info('updating git repo submodules...')
+            self.submodule_update(
+                    recursive=True,
+                    force_remove=True,
+                    force_reset=True,
+                    keep_going=False,
+                    )
         self.git.reset('--hard', 'HEAD') # XXX: replace with wrapper
         self.git.submodule('update', '--force')
 
@@ -115,7 +118,7 @@ class DebrisRepo(Repo):
             if not package_exist:
                 should_package = True
             if should_package:
-                log.debug('Needs-Build: {}/{};'.format(i.package, i.version))
+                log.info('Needs-Build: {}/{};'.format(i.package, i.version))
                 filtered_pkglist.append(i)
 
         return filtered_pkglist

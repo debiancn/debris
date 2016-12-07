@@ -27,7 +27,9 @@ class DebrisDB(object):
             my_dbpath = dbpath
         else:
             my_dbpath = getconfig('DEBRIS_DB_FILE')
+        log.debug('connection sqlite db: {}'.format(my_dbpath))
         self.conn = sqlite3.connect(my_dbpath)
+        self._sanity_check()
         # TODO: Complete me
 
     def _sanity_check(self):
@@ -35,7 +37,7 @@ class DebrisDB(object):
 
         If there are any missing tables, create them.
         """
-        c = self.cursor()
+        c = self.conn.cursor()
         c.execute('CREATE TABLE IF NOT EXISTS `builtpkg` (`package` TEXT, `version` TEXT);')
         c.execute('CREATE TABLE IF NOT EXISTS `command_history` (`timestamp` INTEGER, `CMDTYPE` TEXT, `OPERATION` TEXT);')
 # TODO: recheck this
@@ -49,7 +51,7 @@ class DebrisDB(object):
              {'package': 'qevercloud', 'version': '3.0.3+ds-1'}]
         """
         builtlist = []
-        c = self.cursor()
+        c = self.conn.cursor()
         result = c.execute('SELECT `package`, `version` FROM `builtpkg`;').fetchall()
         for i in result:
             builtlist.append(dict(package=i[0], version=i[1]))

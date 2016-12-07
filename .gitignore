@@ -3,3 +3,5 @@
 *.pyo
 *.swp
 __pycache__
+repo
+history.db
