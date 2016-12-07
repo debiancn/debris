@@ -148,6 +148,8 @@ class ClonedRepoContext(object):
     All building process should be inside the directory represented by this
     context manager object. By default, the building dir should be in /tmp.
 
+    Entering will also chdir.
+
     /
     |
     -- ..
@@ -180,9 +182,11 @@ class ClonedRepoContext(object):
         self.tmpdir = tempfile.TemporaryDirectory(prefix='debris_')
         self.path = self.tmpdir.name
         self.blacklisted_packages = blacklisted_packages
+        self._old_cwd = os.getcwd()
         log.debug('generating building tmpdir: {}'.format(self.tmpdir))
 
     def __enter__(self):
+        os.chdir(self.path)
         for i in self.todo_list:
             "clone all the repos in the list into tmpdir."
             if i.package in self.blacklisted_packages:
@@ -196,10 +200,13 @@ class ClonedRepoContext(object):
 
     def __exit__(self, type, value, traceback):
         log.debug('cleaning up tmpdir...')
+        os.chdir(self._old_cwd)
         self.tmpdir.cleanup()
 
     def reset(self):
         """Clean up built files; return to completely clean."""
+        # go back to topdir
+        os.chdir(self.path)
         for i in self.cloned_repo_list:
             i.git('reset', '--hard')
             i.git('clean', '-df')

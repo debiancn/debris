@@ -3,6 +3,7 @@
 """debris-start -- trigger for debris debian package autobuild system."""
 
 import argparse
+import os
 
 import debris
 import debris.db
@@ -12,6 +13,7 @@ import debris.common
 
 from debris.common import log, flags, getconfig
 from debris.common import DebrisGlobalLock
+from debris.common import run_process
 
 my_builder = None
 
@@ -107,7 +109,43 @@ def main():
 # XXX: WE SHOULD CONSIDER USING A QUEUE TO ARRANGE ALL WORKS!
             with debris.git.ClonedRepoContext(my_git_repo, todo_pkglist) as gcontext:
                 log.debug("Good! we have context: {}".format(gcontext.path))
-                __import__("time").sleep(3600)
+                for i in my_builder.instances: # different chroots available
+                    for j in gcontext.cloned_repo_list:
+                        os.chdir(j.working_dir)
+
+                        "Determine if we should use pristine-tar here."
+                        _local_pristine_tar_line = "--git-no-pristine-tar"
+                        try:
+                            j.git.checkout('origin/pristine-tar', '-b', 'pristine-tar')
+                            j.git.checkout('-')
+                            _local_pristine_tar_line = "--git-pristine-tar"
+                        except:
+                            _local_pristine_tar_line = "--git-no-pristine-tar"
+
+                        "Real building!"
+                        log.info('Starting build: {}'.format(j.working_dir))
+                        result = run_process([ # XXX: really bad implementation!
+                                'gbp',
+                                'buildpackage',
+                                '--git-submodules',
+                                _local_pristine_tar_line,
+                                '--git-builder="sbuild -A -v --source-only-changes -c {}"'.format(i.chroot),
+                                ])
+
+# TODO: deal with build result and log, write into db
+
+                    "send all building result to another dir."
+                    _local_path = gcontext.path
+                    for i in os.listdir(_local_path):
+                        _local_filepath = os.path.join(_local_path, i)
+                        if not os.path.isdir(_local_filepath):
+                            "send this file away."
+# FIXME: send away this file!
+                            os.system('mv -f {} /tmp/'.format(_local_filepath))
+
+                    "finish for one architecture. clean up all built files."
+                    log.info('build for arch {} finished, continue.'.format(i.arch))
+                    gcontext.reset()
                 pass
 
 
