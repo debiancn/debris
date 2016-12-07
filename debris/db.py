@@ -50,8 +50,7 @@ class DebrisDB(object):
         """
         builtlist = []
         c = self.cursor()
-        result = c.execute('SELECT * FROM `builtpkg`;').fetchall()
-# TODO: finish me
+        result = c.execute('SELECT `package`, `version` FROM `builtpkg`;').fetchall()
+        for i in result:
+            builtlist.append(dict(package=i[0], version=i[1]))
         return builtlist
-        pass
-# TODO FIXME

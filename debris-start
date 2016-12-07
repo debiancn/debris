@@ -10,7 +10,7 @@ import debris.git
 import debris.sbuild
 import debris.common
 
-from debris.common import log
+from debris.common import log, flags
 from debris.common import DebrisGlobalLock
 
 my_builder = None
@@ -56,6 +56,11 @@ def main():
             help="decrease verbose level",
             action="count",
             )
+    parser.add_argument(
+            '--update-base-chroot',
+            help="also update base chroots when preparing",
+            action="store_true",
+            )
     args = parser.parse_args()
     "calcuate verbosity first."
     log.setLevel(debris.common.get_log_verbosity((args.verbose or 0) - (args.quiet or 0)))
@@ -77,7 +82,8 @@ def main():
 
             global my_builder
             my_builder = debris.sbuild.SBuilder()
-            my_builder.prepare()
+            if args.update_base_chroot:
+                my_builder.prepare()
 
     except DebrisGlobalLock.DebrisInstanceLockedError as e:
         raise

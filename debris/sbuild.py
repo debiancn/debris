@@ -10,7 +10,7 @@ import configparser
 
 from .common import run_process
 from .common import getconfig
-from .common import log
+from .common import log, flags
 
 class SBuilder(object):
     class SBInstance(object):

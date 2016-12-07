@@ -47,21 +47,33 @@ def __init_logger() -> logging.Logger:
 
     return l
 
+"global logger"
 log = __init_logger()
 
-def load_config(filepath: str) -> configparser.ConfigParser:
+"Used for storage of config from file, if exists"
+config_from_file = None
+
+"global flags"
+flags = []
+
+def load_config(filepath: str) -> dict:
     """
     load configuration file using configparser.
-
-    return a ConfigParser instance.
     """
     config = configparser.ConfigParser()
+    result_dict = {}
     try:
         config.read(filepath)
     except:
         raise
 # TODO: exception handler
-    return config
+    for i in config.keys():
+        for j in config[i].keys():
+            result_dict[j.upper()] = config[i][j]
+
+    config_from_file = result_dict
+
+    return # XXX: to be storaged in config_from_file?
 
 def getconfig(config_key: str, returntype: type = str):
     """
@@ -85,13 +97,13 @@ def getconfig(config_key: str, returntype: type = str):
             'DEBRIS_GIT_REPO_LOCAL' : '/home/hosiet/src/debiancn/repo',
             }
 
-
-    config = BUILTIN_CONFIG
     # TODO: load config file here
     # TODO: load envvar here
 
-    if config_key in config.keys():
-        return returntype(config[config_key])
+    if config_from_file and config_key in config_from_file.keys():
+        return returntype(config_from_file[config_key])
+    elif config_key in BUILTIN_CONFIG.keys():
+        return returntype(BUILTIN_CONFIG[config_key])
     else:
         raise Exception('ERR_CONFIG_KEY_NOT_RECOGNIZED')
 
