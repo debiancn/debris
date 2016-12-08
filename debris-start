@@ -44,7 +44,7 @@ def main():
             '-V',
             help="show program version",
             action="version",
-            version="debris-start 0.0.0",
+            version="debris-start 0.0.1",
             )
     parser.add_argument(
             '--verbose',
