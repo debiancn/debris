@@ -133,6 +133,9 @@ class DebrisRepo(Repo):
             repo_package = i.package
             repo_version = i.version
             for j in builtlist:
+                if 'ONLY_BUILD' in debris.common.flags:
+                    if j['package'] == debris.common.flags['ONLY_BUILD']:
+                        should_package = True
                 if j['package'] == repo_package:
                     package_exist = True
                     if apt_pkg.version_compare(repo_version, j['version']) > 0:

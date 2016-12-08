@@ -68,6 +68,11 @@ def main():
             help="update git repo and its submodule when preparing",
             action="store_true",
             )
+    parser.add_argument(
+            '--only',
+            '-o',
+            help="do not build everything, only the given package name",
+            )
     args = parser.parse_args()
 
     "calcuate verbosity first."
@@ -83,6 +88,9 @@ def main():
         debris.common.load_config(args.config)
     if args.update_git_repo:
         debris.common.flags['UPDATE_GIT_REPO'] = True
+    if args.only:
+        debris.common.flags['ONLY_BUILD'] = str(args.only)
+        log.info('--only set, will only build package {}.'.format(args.only))
 
     "Now, we really start the working instance."
 
@@ -111,6 +119,7 @@ def main():
                 log.debug("Good! we have context: {}".format(gcontext.path))
                 for i in my_builder.instances: # different chroots available
                     for j in gcontext.cloned_repo_list:
+
                         os.chdir(j.working_dir)
 
                         "Determine if we should use pristine-tar here."
