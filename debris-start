@@ -116,6 +116,11 @@ def main():
                         "Determine if we should use pristine-tar here."
                         _local_pristine_tar_line = "--git-no-pristine-tar"
                         try:
+                            j.git.checkout('origin/master', '-b', 'master')
+                            j.git.checkout('-')
+                        except:
+                            pass
+                        try:
                             j.git.checkout('origin/pristine-tar', '-b', 'pristine-tar')
                             j.git.checkout('-')
                             _local_pristine_tar_line = "--git-pristine-tar"

@@ -94,6 +94,11 @@ class DebrisRepo(Repo):
             for i in _local_pkglist:
                 _local_subrepo = i.repo
                 try:
+                    _local_subrepo.git.checkout('origin/master', '-b', 'master')
+                    _local_subrepo.git.checkout('-')
+                except:
+                    pass
+                try:
                     _local_subrepo.git.checkout('origin/pristine-tar', '-b', 'pristine-tar')
                     _local_subrepo.git.checkout('-')
                 except:
@@ -237,11 +242,17 @@ def repo_get_upstream_tag_version(repo: Repo):
 
     _changelog = Changelog(open(os.path.join(repo.working_dir, 'debian/changelog')).read())
     _version = _changelog.get_version()
+    log.debug('full version string is: {}'.format(_version))
     _target_str = ""
     if repo_is_debian_native(repo):
+        log.debug('this is native debian package.')
         _target_str = str(_version)
     else:
-        _target_str = str(_version).split(str(_version._BaseVersion__debian_revision))[0][0:-1]
+        log.debug('this is not native debian package, demangling...')
+        _local_debian_revision = '-' + _version._BaseVersion__debian_revision
+        log.debug('the debian revision is {}'.format(_local_debian_revision))
+        _target_str = str(_version).split(str(_local_debian_revision))[0]
+    log.debug('final unmangled upstream version is: {}'.format(_target_str))
 
     "Version mangling according to DEP-14."
     _target_str = _target_str.replace(':', '%').replace('~', '_')
