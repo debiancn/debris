@@ -142,7 +142,7 @@ def main():
                                 '--git-submodules',
                                 '--git-ignore-branch',
                                 _local_pristine_tar_line,
-                                '--git-builder="sbuild -A -v --source-only-changes -c {}"'.format(i.chroot),
+                                '--git-builder=sbuild -A -v --source-only-changes -c {}'.format(i.chroot),
                                 ]
 
                         if _local_is_debian_native:

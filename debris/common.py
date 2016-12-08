@@ -140,7 +140,7 @@ class DebrisGlobalLock(object):
         fcntl.lockf(self.f.fileno(), fcntl.LOCK_UN)
         self.f.close()
 
-def run_process(arglist, timeout=None) -> subprocess.CompletedProcess:
+def run_process(arglist, timeout=None, check=True) -> subprocess.CompletedProcess:
     """
     Wrapper for subprocess.run()
 
@@ -155,7 +155,7 @@ def run_process(arglist, timeout=None) -> subprocess.CompletedProcess:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 timeout=timeout,
-                check=True,
+                check=False,
                 );
     except subprocess.TimeoutExpired as e:
         # TODO: deal with it
@@ -163,16 +163,20 @@ def run_process(arglist, timeout=None) -> subprocess.CompletedProcess:
                 str(e)))
         raise
         return e
-    except subprocess.CalledProcessError as e:
-        # TODO: deal with it
-        log.error('subprocess returned with non-zero! Exception: {}.'.format(
-                str(e)))
-        raise
-        return e
     except Exception as e:
         log.critical('unhandled exception raised! Exception: {}.'.format(
                 str(e)))
         raise
+
+    # log the result, if error happens and check=False
+    try:
+        result.check_returncode()
+    except subprocess.CalledProcessError as e:
+        log.error('subprocess returned with non-zero! Exception: {}.'.format(str(e)))
+        log.error('stderr: {}.'.format(str(result.stderr)))
+        log.error('stdout: {}.'.format(str(result.stdout)))
+        if check == True:
+            raise
 
     return result
 
