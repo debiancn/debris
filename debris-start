@@ -178,7 +178,7 @@ def main():
                             os.system('mv -f {} {}'.format(_local_filepath, getconfig('DEBRIS_SBUILD_OUTPUTDIR'))) # XXX: no relative path support
 
                     "finish for one architecture. clean up all built files."
-                    log.info('build for arch {} finished, continue.'.format(i.arch))
+                    log.info('build for arch {} finished, continue for next arch...'.format(i))
                     gcontext.reset()
                 pass
 

@@ -133,9 +133,6 @@ class DebrisRepo(Repo):
             repo_package = i.package
             repo_version = i.version
             for j in builtlist:
-                if 'ONLY_BUILD' in debris.common.flags:
-                    if j['package'] == debris.common.flags['ONLY_BUILD']:
-                        should_package = True
                 if j['package'] == repo_package:
                     package_exist = True
                     if apt_pkg.version_compare(repo_version, j['version']) > 0:
@@ -143,6 +140,13 @@ class DebrisRepo(Repo):
                         should_package = True
             if not package_exist:
                 should_package = True
+
+            if 'ONLY_BUILD' in flags:
+               if repo_package == flags['ONLY_BUILD']:
+                    should_package = True
+               else:
+                    should_package = False
+           
             if should_package:
                 log.info('Needs-Build: {}/{};'.format(i.package, i.version))
                 filtered_pkglist.append(i)
@@ -216,9 +220,9 @@ class ClonedRepoContext(object):
         # go back to topdir
         os.chdir(self.path)
         for i in self.cloned_repo_list:
-            i.git('reset', '--hard')
-            i.git('clean', '-df')
-            i.git('clean', '-Xdf')
+            i.git.reset('--hard')
+            i.git.clean('-df')
+            i.git.clean('-Xdf')
         # also remove non-directories in buildpath
         _local_path = self.path
         for i in os.listdir(_local_path):
