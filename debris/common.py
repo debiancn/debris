@@ -95,6 +95,7 @@ def getconfig(config_key: str, returntype: type = str):
             'DEBRIS_DB_FILE' : '/var/cache/debris/history.db',
             'DEBRIS_SBUILD_MIRRORURI' : 'http://ftp2.cn.debian.org/debian',
             'DEBRIS_SBUILD_EXTRAURI' : 'http://repo.debiancn.org/',
+            'DEBRIS_SBUILD_USE_EXTRA_REPO' : 'no',
             'DEBRIS_SBUILD_OUTPUTDIR' : '/var/cache/debris/output/',
             'DEBRIS_SBUILD_CHROOT_ARCH' : ['amd64',],
             'DEBRIS_SBUILD_CHROOT_SUITE' : ['stretch',],

@@ -144,6 +144,7 @@ def main():
                         if debris.git.repo_is_debian_native(j):
                             _local_is_debian_native = True
 
+
                         "Now we form the build command."
                         _local_build_command = [
                                 'gbp',
@@ -153,6 +154,14 @@ def main():
                                 _local_pristine_tar_line,
                                 '--git-builder=sbuild -A -v --source-only-changes -c {}'.format(i.chroot),
                                 ]
+
+                        "Enabling extra repo, if specified." # TODO: add command line arguments
+                        _local_if_use_extra_repo = getconfig('DEBRIS_SBUILD_USE_EXTRA_REPO')
+                        if _local_if_use_extra_repo == "yes":
+                            _local_build_command.append(
+                                    '--extra-repository="{}"'.format(getconfig('DEBRIS_SBUILD_EXTRA_REPO')))
+                            _local_build_command.append(
+                                    '--extra-repository-key={}'.format(getconfig('DEBRIS_SBUILD_EXTRA_REPO_KEY')))
 
                         if _local_is_debian_native:
                             _local_build_command.append('--git-no-create-orig')
@@ -189,32 +198,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-# FIXME: set global lock to prevent multiple instances
-# FIXME: wrap the schroot loading into a function
-# TODO: load schroot configuration
-    pass
-# TODO: update schroot
-    pass
-# FIXME: wrap the git parsing into a function
-# TODO: find the local git repository and do cleanup / init
-    pass
-# TODO: update local git repository and submodules
-    pass
-# TODO: compare local repo and db info; filter packages to build
-# FIXME: wrap the building part into a function
-# TODO: generate the git-wanna-build list
-    pass
-# TODO: generate source package and .dsc description file
-    pass
-# TODO: build packages using .dsc; put the result in the given path
-    pass
-# TODO: post-build checks
-    pass
-# TODO: record build log; generate the build report; send out report
-    pass
-# FIXME: wrap the reprepro handler into a function
-# TODO: let reprepro checkin the given src packages and deb packages
-    pass
-# TODO: generate the check-in report; send out report
-    pass
-# FIXME: release global lock on exit (context?)
