@@ -94,6 +94,7 @@ class DebrisRepo(Repo):
             for i in _local_pkglist:
                 _local_subrepo = i.repo
                 try:
+                    _local_subrepo.git.fetch('--tags')
                     _local_subrepo.git.checkout('origin/master', '-b', 'master')
                     _local_subrepo.git.checkout('-')
                 except:
