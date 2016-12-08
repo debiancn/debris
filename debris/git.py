@@ -87,7 +87,7 @@ class DebrisRepo(Repo):
                     keep_going=False,
                     )
         self.git.reset('--hard', 'HEAD') # XXX: replace with wrapper
-        self.git.submodule('update', '--force')
+        self.git.submodule('update', '--force', '--recursive')
         if 'UPDATE_GIT_REPO' in flags.keys() and flags['UPDATE_GIT_REPO']:
             log.info('WORKAROUND: pulling in any pristine-tar branch.')
             _local_pkglist = self.get_pkglist()
@@ -109,7 +109,7 @@ class DebrisRepo(Repo):
                         log.warn('repo "{}" does not have pristine-tar, ignoring...'.format(i.package))
                     pass
         self.git.reset('--hard', 'HEAD')
-        self.git.submodule('update', '--force')
+        self.git.submodule('update', '--force', '--recursive')
 
     def get_pkglist(self) -> list:
         """Obtain a list about the information of existing repo.
