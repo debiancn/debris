@@ -147,7 +147,7 @@ class DebrisRepo(Repo):
                     should_package = True
                else:
                     should_package = False
-           
+
             if should_package:
                 log.info('Needs-Build: {}/{};'.format(i.package, i.version))
                 filtered_pkglist.append(i)
@@ -242,13 +242,24 @@ def repo_is_debian_native(repo: Repo):
     else:
         return False
 
-def repo_get_upstream_tag_version(repo: Repo):
+def _repo_get_changelog(repo: Repo) -> Changelog:
+    return Changelog(open(os.path.join(repo.working_dir, 'debian/changelog')).read())
+
+def repo_get_package_name(repo: Repo) -> str:
+    _changelog = _repo_get_changelog(repo)
+    return _changelog.package
+
+def repo_get_latest_version(repo: Repo) -> str:
+    _changelog = _repo_get_changelog(repo)
+    return str(_changelog.version)
+
+def repo_get_upstream_tag_version(repo: Repo) -> str:
     """Get the upstream tag version.
 
     .. note: this is not a upstream version. Epoch is included here.
     """
 
-    _changelog = Changelog(open(os.path.join(repo.working_dir, 'debian/changelog')).read())
+    _changelog = _repo_get_changelog(repo)
     _version = _changelog.get_version()
     log.debug('full version string is: {}'.format(_version))
     _target_str = ""

@@ -4,6 +4,7 @@
 
 import argparse
 import os
+import subprocess
 
 import debris
 import debris.db
@@ -16,6 +17,7 @@ from debris.common import DebrisGlobalLock
 from debris.common import run_process
 
 my_builder = None
+my_db = None
 
 def firstrun():
     """Debris first-run wizard."""
@@ -108,6 +110,7 @@ def main():
             my_git_repo = debris.git.DebrisRepo(getconfig('DEBRIS_GIT_REPO_LOCAL'))
 
             "the object that represent the db"
+            global my_db
             my_db = debris.db.DebrisDB(getconfig('DEBRIS_DB_FILE'))
             todo_pkglist = my_git_repo.get_todo_pkglist(
                     my_db.get_builtlist()
@@ -173,7 +176,22 @@ def main():
                         "Real building!"
                         log.info('Starting build: {}'.format(j.working_dir))
                         log.debug('Build command: {}'.format(str(_local_build_command)))
-                        result = run_process(_local_build_command) # XXX: really bad implementation!
+                        result = run_process(_local_build_command, check=False) # XXX: really bad implementation!
+
+                        "check results and log failure"
+                        _local_success = True
+                        try:
+                            result.check_returncode()
+                        except subprocess.CalledProcessError as e:
+                            _local_success = False
+                        global my_db
+                        my_db.log_transaction(
+                                debris.git.repo_get_package_name(j),
+                                debris.git.repo_get_latest_version(j),
+                                _local_success,
+                                stdout=result.stdout,
+                                stderr=result.stderr,
+                                )
 
 # TODO: deal with build result and log, write into db
 

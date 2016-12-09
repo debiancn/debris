@@ -3,6 +3,7 @@
 # debris.db -- database-related operations for debris
 
 import sqlite3
+import time
 
 from . import common
 from .common import run_process
@@ -38,8 +39,9 @@ class DebrisDB(object):
         If there are any missing tables, create them.
         """
         c = self.conn.cursor()
-        c.execute('CREATE TABLE IF NOT EXISTS `builtpkg` (`package` TEXT, `version` TEXT);')
-        c.execute('CREATE TABLE IF NOT EXISTS `command_history` (`timestamp` INTEGER, `CMDTYPE` TEXT, `OPERATION` TEXT);')
+        c.execute('CREATE TABLE IF NOT EXISTS `builtpkg` (`package` TEXT NOT NULL, `version` TEXT NOT NULL);')
+        c.execute('CREATE TABLE IF NOT EXISTS `command_history` (`timestamp` INTEGER NOT NULL, `CMDTYPE` TEXT NOT NULL, `OPERATION` TEXT);')
+        c.execute('CREATE TABLE IF NOT EXISTS `build_history` (`timestamp` INTEGER NOT NULL, `package` TEXT NOT NULL, `version` TEXTNOT NULL, `status` INTEGER NOT NULL, `stdout` BLOB, `stderr` BLOB);')
 # TODO: recheck this
         pass
 
@@ -56,3 +58,19 @@ class DebrisDB(object):
         for i in result:
             builtlist.append(dict(package=i[0], version=i[1]))
         return builtlist
+
+    def log_transaction(
+            self,
+            package: str,
+            version: str,
+            status: bool,
+            stdout: bytes = None,
+            stderr: bytes = None,
+            )
+        """Log one building attempt into the database.
+        """
+        log.debug('logging build attempt...')
+        _current_time = int(time.time())
+        c = self.conn.cursor()
+        c.execute('INSERT INTO `build_history` (`timestamp`, `package`, `version`, `status`, `stdout`, `stderr`) VALUES (?, ?, ?, ?, ?, ?)', (_current_time, package, version, int(status), stdout, stderr,))
+        c.commit()
