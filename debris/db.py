@@ -66,7 +66,7 @@ class DebrisDB(object):
             status: bool,
             stdout: bytes = None,
             stderr: bytes = None,
-            )
+            ):
         """Log one building attempt into the database.
         """
         log.debug('logging build attempt...')
