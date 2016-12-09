@@ -73,4 +73,4 @@ class DebrisDB(object):
         _current_time = int(time.time())
         c = self.conn.cursor()
         c.execute('INSERT INTO `build_history` (`timestamp`, `package`, `version`, `status`, `stdout`, `stderr`) VALUES (?, ?, ?, ?, ?, ?)', (_current_time, package, version, int(status), stdout, stderr,))
-        c.commit()
+        self.conn.commit()
